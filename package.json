@@ -1,0 +1,19 @@
+{
+  "name": "clock-for-steelseries-oled",
+  "version": "0.1.0",
+  "description": "Real-time clock for SteelSeries keyboard OLED screen",
+  "main": "main.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "keywords": [
+    "time",
+    "clock",
+    "oled",
+    "keyboard",
+    "steelseries"
+  ],
+  "author": "Markus Karjalainen",
+  "license": "ISC",
+  "type": "module"
+}
