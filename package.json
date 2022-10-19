@@ -4,7 +4,7 @@
   "description": "Real-time clock for SteelSeries keyboard OLED screen",
   "main": "main.js",
   "scripts": {
-    "test": "npm test"
+    "test": "mocha"
   },
   "keywords": [
     "time",
@@ -15,5 +15,8 @@
   ],
   "author": "Markus Karjalainen",
   "license": "ISC",
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "mocha": "^10.1.0"
+  }
 }

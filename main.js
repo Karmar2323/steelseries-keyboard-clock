@@ -1,4 +1,4 @@
-/* Project Purpose: Display clock digits on SteelSeries keyboard OLED and/or backlit keys */
+/* Project purpose: Display clock digits on SteelSeries keyboard OLED and/or backlit keys */
 
 import { setTimeout as setTimeoutPromise } from 'node:timers/promises';
 import os from 'node:os';
@@ -22,9 +22,13 @@ function initialize() {
     /* Get the destination address from file */
     let dest = getDestination(infoFile);
 
+    // TODO
+    // bindGameSenseEvent();
+
     mainLoop(dest);
 
 };
+
 
 /* Out:  (string) Current time in local format */
 function getTimeString() {
@@ -78,10 +82,8 @@ function resolveWin32Path(filepath) {
     // get root directory
     let rootDir = path.parse(process.env.PATH.split(path.delimiter)[0]).root;
 
-    // make regexp
-    const re = new RegExp(pathEnd.substring(0, 1), 'g');
-    // replace matches on position 0 and others
-    pathEnd = filepath.replace(re, replacer);
+    pathEnd = dataHandler.removeCharsFromString(pathEnd, pathEnd.substring(0, 1));
+
     // final path
     pathEnd = path.join(rootDir, path.sep, pathEnd);
 
@@ -96,7 +98,7 @@ function stopApp(code) {
 
 async function mainLoop(destination) {
 
-    let postingStatus = false;
+    let postingStatus = false; // indicate failed or successful post
     let failCount = 0; // count failures
 
     while (true) {
@@ -107,7 +109,7 @@ async function mainLoop(destination) {
         }
         let clockTime = getTimeString();
 
-        postingStatus = dataHandler.postJSON(destination, clockTime);
+        postingStatus = await dataHandler.postJSON(destination, clockTime);
 
         if (!postingStatus) {
             failCount++;
@@ -115,7 +117,7 @@ async function mainLoop(destination) {
             // successful post resets counter
             failCount = 0;
         }
-        await setTimeoutPromise(1000);
+        await setTimeoutPromise(500);
 
     }
 
