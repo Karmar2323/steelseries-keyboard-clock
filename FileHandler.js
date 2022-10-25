@@ -1,5 +1,4 @@
 import fs from 'node:fs';
-// import path from 'node:path';
 
 class FileHandler {
     constructor() { }
@@ -8,7 +7,6 @@ class FileHandler {
         Out: (string) address with port number or
              null, if address not found:  */
     readFileContent(file) {
-        // console.log("# ~ readPortJSON ~ file", file);
 
         let fileContent;
         try {

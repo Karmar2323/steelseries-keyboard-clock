@@ -5,13 +5,16 @@ import os from 'node:os';
 import path from 'node:path';
 import FileHandler from './FileHandler.js';
 import DataHandler from './DataHandler.js';
-
+import ClockData from './ClockData.js';
+import TrafficHandler from './TrafficHandler.js';
 
 
 const portFileOnOSX = "/Library/Application Support/SteelSeries Engine 3/coreProps.json";
 const portFileOnWindows = "%PROGRAMDATA%/SteelSeries/SteelSeries Engine 3/coreProps.json";
+const registerURLpath = "/register_game_event";
 
 const dataHandler = new DataHandler();
+const trafficHandler = new TrafficHandler();
 
 
 function initialize() {
@@ -23,11 +26,27 @@ function initialize() {
     let dest = getDestination(infoFile);
 
     // TODO
-    // bindGameSenseEvent();
+    // bindGameEvent();
+    registerGameEvent(dest);
 
     mainLoop(dest);
 
 };
+
+
+function registerGameEvent(url) {
+
+    let registerData = new ClockData().registerEventData;
+
+    //TODO post,
+    url  = url + registerURLpath;
+    postClockData(url, "", registerData);
+}
+
+function bindGameEvent() {
+
+
+}
 
 
 /* Out:  (string) Current time in local format */
@@ -76,9 +95,6 @@ function resolveWin32Path(filepath) {
 
     let pathEnd = filepath;
 
-    const replacer = function () {
-        return "";
-    }
     // get root directory
     let rootDir = path.parse(process.env.PATH.split(path.delimiter)[0]).root;
 
@@ -96,6 +112,32 @@ function stopApp(code) {
 }
 
 
+function checkOptions(options) {
+
+    //TODO check address options
+    return options;
+}
+
+
+// async function postClockData(dest, cTime) {
+//     let jsonData = dataHandler.formatJSONstring(cTime, new ClockData().messageData);
+//     let requestOptions = trafficHandler.getHttpOptions(dest);
+//     // checkOptions(requestOptions);
+//     await trafficHandler.startPostingData(requestOptions, jsonData);
+// }
+
+/* Make http options from url and JSON from string, start posting JSON to url
+    In: url (string), string, object
+    Out: */
+async function postClockData(dest, dataString, dataObj) {
+
+    let jsonData = dataHandler.formatJSONstring(dataString, dataObj);
+    let requestOptions = trafficHandler.getHttpOptions(dest);
+    // checkOptions(requestOptions);
+    await trafficHandler.startPostingData(requestOptions, jsonData);
+}
+
+
 async function mainLoop(destination) {
 
     let postingStatus = false; // indicate failed or successful post
@@ -107,9 +149,10 @@ async function mainLoop(destination) {
             // Stop after consecutive fails to post
             break;
         }
+
         let clockTime = getTimeString();
 
-        postingStatus = await dataHandler.postJSON(destination, clockTime);
+        postingStatus = await postClockData(destination, clockTime, new ClockData().messageData);
 
         if (!postingStatus) {
             failCount++;
@@ -127,4 +170,3 @@ async function mainLoop(destination) {
 
 /* App start */
 initialize();
-
