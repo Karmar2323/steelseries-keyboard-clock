@@ -26,6 +26,22 @@ class ClockData {
         "value_optional": false
       }
 
-    constructor(){}
+
+    // "Note: Engine 3.7.0 and later"
+    screenHandler = {
+        "device-type": "screened",
+        "zone": "one",
+        "mode": "screen",
+        "datas": [{
+            "has-text": true,
+            "context-frame-key": "custom-text"
+        }]
+    }
+
+    bindEventData = this.registerEventData;
+
+    constructor(){
+        this.bindEventData["handlers"] =[this.screenHandler];
+    }
 
 } export default ClockData;

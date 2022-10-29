@@ -12,41 +12,91 @@ import TrafficHandler from './TrafficHandler.js';
 const portFileOnOSX = "/Library/Application Support/SteelSeries Engine 3/coreProps.json";
 const portFileOnWindows = "%PROGRAMDATA%/SteelSeries/SteelSeries Engine 3/coreProps.json";
 const registerURLpath = "/register_game_event";
+const bindURLpath = "/bind_game_event";
+const corePropName = "address"; // property name in JSON file
+let registered = false; // event registration status
 
 const dataHandler = new DataHandler();
 const trafficHandler = new TrafficHandler();
+const clockData = new ClockData();
 
-
-function initialize() {
+/*
+In: (string) property name to find in JSON file
+Out: undefined
+    */
+async function initialize(altPropName) {
 
     // Get platform and destination info
     const infoFile = getFilePath(os.platform());
 
+    if(typeof infoFile === "number") {
+        stopApp(infoFile); // no valid path found
+        return;
+    }
+
     /* Get the destination address from file */
-    let dest = getDestination(infoFile);
+    let dest = getDestination(infoFile, altPropName);
 
-    // TODO
-    // bindGameEvent();
-    registerGameEvent(dest);
+    // try to bind handler to destination
+    registered = await registerOrBindGameEvent('http://' + dest, 'bind');
 
-    mainLoop(dest);
+    if(registered) {
+        mainLoop(dest);
+    }
+    else {
+        // binding failed, try registering
+        await setTimeoutPromise(5000);
+        registered = await registerOrBindGameEvent('http://' + dest, 'register');
+
+        if(registered) {
+            mainLoop(dest);
+        } else {
+            tryInitializing(altPropName);
+        }
+    }
 
 };
 
 
-function registerGameEvent(url) {
-
-    let registerData = new ClockData().registerEventData;
-
-    //TODO post,
-    url  = url + registerURLpath;
-    postClockData(url, "", registerData);
-}
-
-function bindGameEvent() {
-
+/* Wait some and start over
+In: (string) property name to find in JSON file 
+Out: undefined */
+async function tryInitializing(propName) {
+    await setTimeoutPromise(15000);
+    initialize(propName); 
 
 }
+
+
+/* Register or bind event to destination to enable its handling of data
+In: url for destination (string), action (string)
+Out: (boolean) true when successful | false otherwise */
+async function registerOrBindGameEvent(url, action) {
+
+    let registerData;
+
+    if(action === 'bind') {
+        url = url + bindURLpath;
+        registerData = new ClockData().bindEventData;
+    } else {
+        url  =  url + registerURLpath;
+        registerData = new ClockData().registerEventData;
+
+    }
+
+    // postClockData(url, "", registerData);
+    // let result = await trafficHandler.postToLocalHttpHostAlt(url, registerData, 'POST');
+    let result = await trafficHandler.postToLocalHttpHostAxios(url, registerData, 'POST');
+
+    if( !result) {
+        console.log(`Event ${action}ing failed`);
+    } else {
+        console.log(`Event ${action}ing successful`);
+    }
+    return result;
+
+}
+
 
 
 /* Out:  (string) Current time in local format */
@@ -58,16 +108,17 @@ function getTimeString() {
 /* Get the necessary destination address.
     Out: null, if address is not found or
         (string) address  */
-function getDestination(filePath) {
+function getDestination(filePath, propName) {
     console.log(`Getting destination address`);
 
     const addressObj = new FileHandler().getObjectFromJSON(filePath);
-    return addressObj.address;
+    return addressObj[`${propName}`];
 
 }
 
 
-/* */
+/* In: os platform (string) 
+    Out: file path (string) | exit code (number) */
 function getFilePath(osPlatform) {
     let filePath = "";
 
@@ -78,10 +129,10 @@ function getFilePath(osPlatform) {
         case "darwin":
             filePath = portFileOnOSX;
             // TODO real path
-            break;
+            // break;
         default:
             console.log("Unsupported OS. Exiting app");
-            stopApp(-1);
+            return 0;
     }
 
     return filePath;
@@ -106,9 +157,12 @@ function resolveWin32Path(filepath) {
     return pathEnd;
 }
 
+
+/* Print exit code and set it to process */
 function stopApp(code) {
     console.log("exit code: " + code);
-    process.exit(code);
+    process.exitCode = code;
+    // process.exit(code);
 }
 
 
@@ -119,54 +173,61 @@ function checkOptions(options) {
 }
 
 
-// async function postClockData(dest, cTime) {
-//     let jsonData = dataHandler.formatJSONstring(cTime, new ClockData().messageData);
-//     let requestOptions = trafficHandler.getHttpOptions(dest);
-//     // checkOptions(requestOptions);
-//     await trafficHandler.startPostingData(requestOptions, jsonData);
-// }
+/* Make JSON from string, start posting JSON to url
+    In: url (string), data (string), object (format for JSON)
+    Out: undefined */
+async function postClockData(dest, dataString, dataObjTemplate) {
 
-/* Make http options from url and JSON from string, start posting JSON to url
-    In: url (string), string, object
-    Out: */
-async function postClockData(dest, dataString, dataObj) {
-
-    let jsonData = dataHandler.formatJSONstring(dataString, dataObj);
-    let requestOptions = trafficHandler.getHttpOptions(dest);
+    let jsonData = dataHandler.formatJSONstring(dataString, dataObjTemplate);
+    // let requestOptions = trafficHandler.getHttpOptions(dest, "POST"); // for node.js http
     // checkOptions(requestOptions);
-    await trafficHandler.startPostingData(requestOptions, jsonData);
+    // await trafficHandler.startPostingData(requestOptions, jsonData);
+    await trafficHandler.startPostingData('http://' + dest, jsonData);
 }
 
-
+/* Loop and try posting data. Stop if too many fails happen and start over from app start.
+    In: url (string)
+    */
 async function mainLoop(destination) {
 
     let postingStatus = false; // indicate failed or successful post
     let failCount = 0; // count failures
 
+
     while (true) {
 
-        if (failCount > 60) {
+        if(!trafficHandler._postSuccessful) {
+
+            failCount++;
+        } else {
+            // successful post resets counter
+            failCount = 0;
+        }
+
+        if (failCount > 30) {
             // Stop after consecutive fails to post
             break;
         }
 
         let clockTime = getTimeString();
 
-        postingStatus = await postClockData(destination, clockTime, new ClockData().messageData);
+        // postingStatus = await postClockData(destination, clockTime, new ClockData().messageData);
+        postClockData(destination, clockTime, clockData.messageData);
 
-        if (!postingStatus) {
-            failCount++;
-        } else {
-            // successful post resets counter
-            failCount = 0;
-        }
-        await setTimeoutPromise(500);
+        // if (!postingStatus) {
+        //     failCount++;
+        // } else {
+        //     // successful post resets counter
+        //     failCount = 0;
+        // }
+        console.debug("Fails: ", failCount);
+        await setTimeoutPromise(1000);
 
     }
 
     // Start again 
-    initialize();
+    tryInitializing(corePropName);
 }
 
 /* App start */
-initialize();
+initialize(corePropName);

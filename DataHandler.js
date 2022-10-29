@@ -23,6 +23,9 @@ class DataHandler {
     }
 
 
+    /* In: any value
+        Out: JSON string or null if JSON throws error */
+
     stringToJSON(value) {
 
         let jsonData;

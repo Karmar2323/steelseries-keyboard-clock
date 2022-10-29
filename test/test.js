@@ -10,5 +10,12 @@ describe ('DataHandler', () => {
             console.debug("# ~ it ~ result", result);
             assert.equal(result.includes(unwanted), false);
         });
+        it(`should return input string`, () => {
+            let input = `12x34x21`;
+            const result = dataHandler.removeCharsFromString(input, unwanted);
+            console.debug("# ~ it ~ result", result);
+            assert.equal(result.includes(input), true);
+        });
+
     });
 });

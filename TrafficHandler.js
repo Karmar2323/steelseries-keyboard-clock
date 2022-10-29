@@ -1,5 +1,6 @@
 import http from 'node:http';
 import { setTimeout as setTimeoutPromise } from 'node:timers/promises';
+import axios from 'axios';
 
 class TrafficHandler {
 
@@ -15,13 +16,21 @@ class TrafficHandler {
         console.log("New destination: ", this._destination);
     }
 
+    _postSuccessful = true;
+    get postSuccessful() {
+        return this._postSuccessful;
+    }
+    set postSuccessful(value) {
+        this._postSuccessful = value;
+    }
+
     constructor() { }
 
-    
+
     /* Parse URL to node.js http request options 
-        In: URL (string)
+        In: URL (string), http method (string)
         Out: http options (object) */
-    getHttpOptions(url) {
+    getHttpOptions(url, method) {
 
         let optionObj = {};
 
@@ -33,22 +42,78 @@ class TrafficHandler {
 
         optionObj.path = url.substring(url.indexOf('/'));
 
-        optionObj.method = 'POST';
+        optionObj.method = method;
 
         return optionObj;
     }
 
 
+    interpretResponse(response) {
+        // TODO
+        if (response.status !== undefined) {
 
-    async postToLocalHttpHostAlt (options, data) {
-        
+            if(response.status === 200) {
+                return true;
+            } else {
+                console.debug("response.status", response.status);
+                return false;
+            }
+
+        }
+        console.log("Unknown response");
+        return false;
     }
 
 
-    // TODO alternative
+    // TODO
+    interpretError(error) {
+        return false;
+    }
+
+
+    /* In: url (string), data for request, http method (string)
+        Out: response (object) | error */
+    async postToLocalHttpHostAxios(url, data, method) {
+
+        let options = {url: url, data: data, method: method};
+        let response;
+
+        try {
+            response = await axios(options);
+        } catch (e) {
+            console.error (e.code + ': ' + options.url + ', data: ' + options.data);
+            return this.interpretError(e);
+        }
+
+        return this.interpretResponse(response);
+    }
+
+
+    /* In: url (string), data for request, http method (string)
+        Out: response (object) | error */
+    async postToLocalHttpHostAlt(url, data, method) {
+        // TODO fix
+        const options = { method: method, body: JSON.stringify(data) };
+
+        try {
+            const response = await fetch(url, options);
+            return response;
+        }
+        catch (e) {
+            console.error(e.message);
+            return e;
+        }
+
+    }
+
+
+
+    // TODO fix, return value
+    /* In: node.js http options (object), data for request
+        Out: success (boolean) */
     async postToLocalHttpHost(options, data) {
 
-        let done = null;
+        let done;
 
         const postRequest = http.request(options, (res) => {
             res.on('data', (chunk) => {
@@ -62,14 +127,16 @@ class TrafficHandler {
         });
 
         postRequest.on('error', (e) => {
-            console.error(`problem with request: ${e.message}`);
+            console.error(`${e.code} problem with request: ${e.message}`);
             done = false;
         });
+
 
         postRequest.write(data);
         postRequest.end();
 
-        await setTimeoutPromise(500);
+        await setTimeoutPromise(1000);
+        // return postRequest.writableEnded;
         return done;
     }
 
@@ -82,7 +149,7 @@ class TrafficHandler {
 
         let success = false;
 
-        this.destination = dest.localAddress;
+        this.destination = dest.localAddress ?? dest;
 
         if (data === null) {
             console.log("Nothing to post");
@@ -91,18 +158,20 @@ class TrafficHandler {
 
         if (dest.localAddress !== null) {
 
-            console.log(`Waiting to post: ${data}`);
+            // console.log(`Waiting to post: ${data}`);
 
-            try {
-                // start posting
-                const res = await this.postToLocalHttpHost(dest, data);
-                // TODO handle response
+            // start posting
+            // const res = await this.postToLocalHttpHost(dest, data);
+            // const res = await this.postToLocalHttpHostAlt(dest, data, 'POST');
+            const res = await this.postToLocalHttpHostAxios(dest, data, 'POST');
 
-                success = res;
+            // TODO handle response, signal fail/success
+            success = res;
 
-            } catch (e) {
-                console.error(e);
-                success = false;
+            if (res === false) {
+                this._postSuccessful = res;
+            } else {
+                this._postSuccessful = true;
             }
 
 
