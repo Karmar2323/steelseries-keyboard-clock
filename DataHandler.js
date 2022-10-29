@@ -3,7 +3,6 @@ class DataHandler {
 
     constructor() { }
 
-
     /* Remove all occurences of a character from string
         In: string, string | RegExp
         Out: string */
@@ -46,24 +45,24 @@ class DataHandler {
     Out: JSON formatted string */
     formatJSONstring(data, message) {
 
+        let numberDataValue = 0;
+
         if (typeof data !== 'string') {
             data = data.toString();
         }
 
-        // let JSONdata = this.stringToJSON();
-
-        // make integer for test posting TODO
-        // let numberDataValue = this.removeCharsFromString(data, data.substring(2,3));
-
         if (message.data !== undefined) {
             /* Sending an event, not registering it with other object */
-            let numberDataValue = new Date().getHours(); // try hours
-
+             // fill progress bar with integer 0..100
+            numberDataValue = Math.floor(new Date().getSeconds() / 60 * 100);
             message.data["value"] = numberDataValue;
-            // msg.data["value"] = JSONdata;
+            // time data: hour & min as text
+            message.data["frame"]["textvalue"] = data.slice(0, 5);
         }
 
-        return JSON.stringify(message);
+        // return JSON.stringify(message);
+        return this.stringToJSON(message);
+        // return message; // works with axios
 
     }
 

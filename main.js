@@ -13,6 +13,8 @@ const portFileOnOSX = "/Library/Application Support/SteelSeries Engine 3/corePro
 const portFileOnWindows = "%PROGRAMDATA%/SteelSeries/SteelSeries Engine 3/coreProps.json";
 const registerURLpath = "/register_game_event";
 const bindURLpath = "/bind_game_event";
+const eventPath = "/game_event";
+const protocol = 'http://';
 const corePropName = "address"; // property name in JSON file
 let registered = false; // event registration status
 
@@ -38,7 +40,7 @@ async function initialize(altPropName) {
     let dest = getDestination(infoFile, altPropName);
 
     // try to bind handler to destination
-    registered = await registerOrBindGameEvent('http://' + dest, 'bind');
+    registered = await registerOrBindGameEvent(protocol + dest, 'bind');
 
     if(registered) {
         mainLoop(dest);
@@ -46,7 +48,7 @@ async function initialize(altPropName) {
     else {
         // binding failed, try registering
         await setTimeoutPromise(5000);
-        registered = await registerOrBindGameEvent('http://' + dest, 'register');
+        registered = await registerOrBindGameEvent(protocol + dest, 'register');
 
         if(registered) {
             mainLoop(dest);
@@ -62,7 +64,8 @@ async function initialize(altPropName) {
 In: (string) property name to find in JSON file 
 Out: undefined */
 async function tryInitializing(propName) {
-    await setTimeoutPromise(15000);
+    console.log("Trying again shortly...")
+    await setTimeoutPromise(30000);
     initialize(propName); 
 
 }
@@ -85,8 +88,8 @@ async function registerOrBindGameEvent(url, action) {
     }
 
     // postClockData(url, "", registerData);
-    // let result = await trafficHandler.postToLocalHttpHostAlt(url, registerData, 'POST');
-    let result = await trafficHandler.postToLocalHttpHostAxios(url, registerData, 'POST');
+    let result = await trafficHandler.postToLocalHttpHostAlt(url, JSON.stringify(registerData), 'POST');
+    // let result = await trafficHandler.postToLocalHttpHostAxios(url, registerData, 'POST');
 
     if( !result) {
         console.log(`Event ${action}ing failed`);
@@ -96,7 +99,6 @@ async function registerOrBindGameEvent(url, action) {
     return result;
 
 }
-
 
 
 /* Out:  (string) Current time in local format */
@@ -181,8 +183,11 @@ async function postClockData(dest, dataString, dataObjTemplate) {
     let jsonData = dataHandler.formatJSONstring(dataString, dataObjTemplate);
     // let requestOptions = trafficHandler.getHttpOptions(dest, "POST"); // for node.js http
     // checkOptions(requestOptions);
-    // await trafficHandler.startPostingData(requestOptions, jsonData);
-    await trafficHandler.startPostingData('http://' + dest, jsonData);
+    if(jsonData !== null) {
+        // await trafficHandler.startPostingData(requestOptions, jsonData);
+        await trafficHandler.startPostingData(dest, jsonData);
+    }
+
 }
 
 /* Loop and try posting data. Stop if too many fails happen and start over from app start.
@@ -196,14 +201,6 @@ async function mainLoop(destination) {
 
     while (true) {
 
-        if(!trafficHandler._postSuccessful) {
-
-            failCount++;
-        } else {
-            // successful post resets counter
-            failCount = 0;
-        }
-
         if (failCount > 30) {
             // Stop after consecutive fails to post
             break;
@@ -212,7 +209,7 @@ async function mainLoop(destination) {
         let clockTime = getTimeString();
 
         // postingStatus = await postClockData(destination, clockTime, new ClockData().messageData);
-        postClockData(destination, clockTime, clockData.messageData);
+        postClockData(protocol + destination + eventPath, clockTime, clockData.messageData);
 
         // if (!postingStatus) {
         //     failCount++;
@@ -220,9 +217,16 @@ async function mainLoop(destination) {
         //     // successful post resets counter
         //     failCount = 0;
         // }
-        console.debug("Fails: ", failCount);
+
         await setTimeoutPromise(1000);
 
+        if(!trafficHandler._postSuccessful) {
+            failCount++;
+            console.debug("Fails: ", failCount);
+        } else {
+            // successful post resets counter
+            failCount = 0;
+        }
     }
 
     // Start again 

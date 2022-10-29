@@ -4,6 +4,8 @@ import axios from 'axios';
 
 class TrafficHandler {
 
+    contentType = 'application/json';
+
     _destination = "";
     get destination() {
         return this._destination;
@@ -24,7 +26,14 @@ class TrafficHandler {
         this._postSuccessful = value;
     }
 
-    constructor() { }
+    axiosInstance = {};
+
+    constructor() {
+        this.axiosInstance = axios.create({
+            baseURL: this._destination
+        });
+        this.axiosInstance.defaults.headers.post['Content-Type'] = this.contentType;
+     }
 
 
     /* Parse URL to node.js http request options 
@@ -44,6 +53,9 @@ class TrafficHandler {
 
         optionObj.method = method;
 
+        optionObj.headers = {
+            'Content-Type': this.contentType
+          }
         return optionObj;
     }
 
@@ -67,6 +79,7 @@ class TrafficHandler {
 
     // TODO
     interpretError(error) {
+        // console.debug("# ~ TrafficHandler ~ interpretError ~ error", error);
         return false;
     }
 
@@ -77,11 +90,13 @@ class TrafficHandler {
 
         let options = {url: url, data: data, method: method};
         let response;
+        // console.debug("# ~ TrafficHandler ~ postToLocalHttpHostAxios ~ options", options);
 
         try {
-            response = await axios(options);
+            // response = await axios(options);
+            response = await this.axiosInstance(options);
         } catch (e) {
-            console.error (e.code + ': ' + options.url + ', data: ' + options.data);
+            console.error (e.code + ': ' + e.message + ': ' + options.url + ', data: ' + options.data);
             return this.interpretError(e);
         }
 
@@ -92,18 +107,24 @@ class TrafficHandler {
     /* In: url (string), data for request, http method (string)
         Out: response (object) | error */
     async postToLocalHttpHostAlt(url, data, method) {
-        // TODO fix
-        const options = { method: method, body: JSON.stringify(data) };
+
+        let response;
+        const options = {
+            method: method,
+            headers: {
+                'Content-Type': this.contentType
+                },
+            body: data
+         };
 
         try {
-            const response = await fetch(url, options);
-            return response;
+            response = await fetch(url, options);
         }
         catch (e) {
             console.error(e.message);
-            return e;
+            return this.interpretError(e);
         }
-
+        return this.interpretResponse(response);
     }
 
 
@@ -162,11 +183,12 @@ class TrafficHandler {
 
             // start posting
             // const res = await this.postToLocalHttpHost(dest, data);
-            // const res = await this.postToLocalHttpHostAlt(dest, data, 'POST');
-            const res = await this.postToLocalHttpHostAxios(dest, data, 'POST');
+            // working alternatives:
+            const res = await this.postToLocalHttpHostAlt(dest, data, 'POST');
+            // const res = await this.postToLocalHttpHostAxios(dest, data, 'POST');
 
             // TODO handle response, signal fail/success
-            success = res;
+            // success = res;
 
             if (res === false) {
                 this._postSuccessful = res;
@@ -180,7 +202,7 @@ class TrafficHandler {
             return false;
         }
 
-        return success;
+        // return success;
     }
 
 }

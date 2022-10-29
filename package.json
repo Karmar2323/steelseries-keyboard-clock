@@ -1,7 +1,7 @@
 {
   "name": "clock-for-steelseries-oled",
-  "version": "0.1.0",
-  "description": "Real-time clock for SteelSeries keyboard OLED screen",
+  "version": "0.2.0",
+  "description": "Real-time clock for SteelSeries device OLED screen",
   "main": "main.js",
   "scripts": {
     "test": "mocha"
@@ -11,7 +11,8 @@
     "clock",
     "oled",
     "keyboard",
-    "steelseries"
+    "steelseries",
+    "gamesense"
   ],
   "author": "Markus Karjalainen",
   "license": "ISC",

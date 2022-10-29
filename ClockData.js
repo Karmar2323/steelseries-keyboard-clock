@@ -13,7 +13,11 @@ class ClockData {
         "game": this.gameName,
         "event": this.eventName,
         "data": {
-            "value": 15
+            "value": 15,
+            "frame": {
+                "textvalue": "test text",
+                "numericalvalue": 12
+            }
         }
     }
 
@@ -22,9 +26,8 @@ class ClockData {
         "event": this.eventName,
         "min_value": 0,
         "max_value": 59,
-        "icon_id": 0,
-        "value_optional": false
-      }
+        "value_optional": true
+    }
 
 
     // "Note: Engine 3.7.0 and later"
@@ -33,15 +36,31 @@ class ClockData {
         "zone": "one",
         "mode": "screen",
         "datas": [{
-            "has-text": true,
-            "context-frame-key": "custom-text"
+            "icon-id": 15,
+            "lines": [
+                {
+                    "has-text": true,
+                    "context-frame-key": "textvalue",
+                    // "context-frame-key": "numericalvalue",
+                    // "arg": "(value: self)",
+                    // "prefix": " Hour :("
+                    // "suffix": ":",
+
+                },
+                {
+                    "has-text": false,
+                    // "context-frame-key": "second-line",
+                    "has-progress-bar": true
+                }
+
+            ]
         }]
     }
 
     bindEventData = this.registerEventData;
 
-    constructor(){
-        this.bindEventData["handlers"] =[this.screenHandler];
+    constructor() {
+        this.bindEventData["handlers"] = [this.screenHandler];
     }
 
 } export default ClockData;
