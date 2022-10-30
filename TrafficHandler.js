@@ -121,7 +121,7 @@ class TrafficHandler {
             response = await fetch(url, options);
         }
         catch (e) {
-            console.error(e.message);
+            console.error(e.message + ': ' + e.cause);
             return this.interpretError(e);
         }
         return this.interpretResponse(response);

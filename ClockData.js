@@ -45,6 +45,7 @@ class ClockData {
                     // "arg": "(value: self)",
                     // "prefix": " Hour :("
                     // "suffix": ":",
+                    "bold": true
 
                 },
                 {

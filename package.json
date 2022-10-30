@@ -1,6 +1,6 @@
 {
   "name": "clock-for-steelseries-oled",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Real-time clock for SteelSeries device OLED screen",
   "main": "main.js",
   "scripts": {

@@ -14,6 +14,8 @@ const portFileOnWindows = "%PROGRAMDATA%/SteelSeries/SteelSeries Engine 3/corePr
 const registerURLpath = "/register_game_event";
 const bindURLpath = "/bind_game_event";
 const eventPath = "/game_event";
+const removeEventPath = "/remove_game_event";
+const removeGamePath = "/remove_game";
 const protocol = 'http://';
 const corePropName = "address"; // property name in JSON file
 let registered = false; // event registration status
@@ -58,6 +60,12 @@ async function initialize(altPropName) {
     }
 
 };
+
+
+// TODO
+function removeEvent() {
+
+}
 
 
 /* Wait some and start over
@@ -141,7 +149,8 @@ function getFilePath(osPlatform) {
 }
 
 
-/* Remove all of '%' and add 'C:\' to beginning 
+/* Remove all of '%' (first char) from string
+and add root ('C:\' from first entry in PATH) to beginning
     In: (string) path 
     Out:  (string) path */
 function resolveWin32Path(filepath) {
@@ -180,7 +189,7 @@ function checkOptions(options) {
     Out: undefined */
 async function postClockData(dest, dataString, dataObjTemplate) {
 
-    let jsonData = dataHandler.formatJSONstring(dataString, dataObjTemplate);
+    let jsonData = dataHandler.formatJSONtimeString(dataString, dataObjTemplate);
     // let requestOptions = trafficHandler.getHttpOptions(dest, "POST"); // for node.js http
     // checkOptions(requestOptions);
     if(jsonData !== null) {
