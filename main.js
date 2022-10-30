@@ -55,24 +55,30 @@ async function initialize(altPropName) {
         if(registered) {
             mainLoop(dest);
         } else {
-            tryInitializing(altPropName);
+            tryInitializing(altPropName, dest);
         }
     }
 
 };
 
 
-// TODO
-function removeEvent() {
+async function removeEvent(url) {
 
+    let result = await trafficHandler.postToLocalHttpHostAlt(protocol + url + removeEventPath, JSON.stringify(clockData.removeEventData), 'POST');
+    if(result) {
+        console.log("Event removed");
+    } else {
+        console.log("Event removal failed");
+    }
 }
 
 
 /* Wait some and start over
-In: (string) property name to find in JSON file 
+In: (string) property name to find in JSON file
 Out: undefined */
-async function tryInitializing(propName) {
-    console.log("Trying again shortly...")
+async function tryInitializing(propName, currentDest) {
+    console.log("Trying again shortly...");
+    removeEvent(currentDest);
     await setTimeoutPromise(30000);
     initialize(propName); 
 
@@ -239,7 +245,7 @@ async function mainLoop(destination) {
     }
 
     // Start again 
-    tryInitializing(corePropName);
+    tryInitializing(corePropName, destination);
 }
 
 /* App start */

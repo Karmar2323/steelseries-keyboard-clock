@@ -40,9 +40,17 @@ class DataHandler {
     }
 
 
+    /* Convert string to positive integer
+    and change its value from scale 0...oldMax to 0...newMax
+    In: number as (string), current maximum (number), new maximum (number)*/
     normalizeNumberFromString(numberString, oldMax, newMax) {
+
         let newNumber = Math.round(Number.parseInt(numberString) / oldMax * newMax);
+        if (Number.isNaN(newNumber)) {
+            return 0;
+        }
         return newNumber;
+
     }
 
 

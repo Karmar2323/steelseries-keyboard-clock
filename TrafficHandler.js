@@ -60,8 +60,10 @@ class TrafficHandler {
     }
 
 
+    /* In: http response
+        Out: (boolean) true for status 200, false otherwise */
     interpretResponse(response) {
-        // TODO
+
         if (response.status !== undefined) {
 
             if(response.status === 200) {
@@ -79,18 +81,17 @@ class TrafficHandler {
 
     // TODO
     interpretError(error) {
-        // console.debug("# ~ TrafficHandler ~ interpretError ~ error", error);
+
         return false;
     }
 
 
     /* In: url (string), data for request, http method (string)
-        Out: response (object) | error */
+        Out: (boolean) returned via interpretResponse or interpretError */
     async postToLocalHttpHostAxios(url, data, method) {
 
         let options = {url: url, data: data, method: method};
         let response;
-        // console.debug("# ~ TrafficHandler ~ postToLocalHttpHostAxios ~ options", options);
 
         try {
             // response = await axios(options);
@@ -105,7 +106,7 @@ class TrafficHandler {
 
 
     /* In: url (string), data for request, http method (string)
-        Out: response (object) | error */
+        Out: (boolean) returned via interpretResponse */
     async postToLocalHttpHostAlt(url, data, method) {
 
         let response;

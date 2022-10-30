@@ -29,7 +29,6 @@ class ClockData {
         "value_optional": true
     }
 
-
     // "Note: Engine 3.7.0 and later"
     screenHandler = {
         "device-type": "screened",
@@ -58,10 +57,18 @@ class ClockData {
         }]
     }
 
-    bindEventData = this.registerEventData;
+    bindEventData;
+    removeEventData;
+
 
     constructor() {
+        // make deep copies
+        this.bindEventData = JSON.parse(JSON.stringify(this.registerEventData));
+        this.removeEventData = JSON.parse(JSON.stringify(this.messageData));
+
+        // modify properties
         this.bindEventData["handlers"] = [this.screenHandler];
+        delete this.removeEventData["data"];
     }
 
 } export default ClockData;
