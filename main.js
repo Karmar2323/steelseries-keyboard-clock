@@ -20,9 +20,15 @@ const protocol = 'http://';
 const corePropName = "address"; // property name in JSON file
 let registered = false; // event registration status
 
-const dataHandler = new DataHandler();
-const trafficHandler = new TrafficHandler();
-const clockData = new ClockData();
+
+const { trafficHandler, clockData, dataHandler } = initGlobals();
+
+function initGlobals() {
+    const dataHandler = new DataHandler();
+    const trafficHandler = new TrafficHandler();
+    const clockData = new ClockData();
+    return { trafficHandler, clockData, dataHandler };
+}
 
 /*
 In: (string) property name to find in JSON file
@@ -78,6 +84,7 @@ In: (string) property name to find in JSON file
 Out: undefined */
 async function tryInitializing(propName, currentDest) {
     console.log("Trying again shortly...");
+    await setTimeoutPromise(5000);
     removeEvent(currentDest);
     await setTimeoutPromise(30000);
     initialize(propName); 
@@ -94,13 +101,19 @@ async function registerOrBindGameEvent(url, action) {
 
     if(action === 'bind') {
         url = url + bindURLpath;
-        registerData = new ClockData().bindEventData;
+        registerData = clockData.bindEventData;
     } else {
         url  =  url + registerURLpath;
-        registerData = new ClockData().registerEventData;
+        registerData = clockData.registerEventData;
 
     }
 
+    /* TODO remove test alternative */
+    // let requestOptions = trafficHandler.getHttpOptions(url, "POST"); // for node.js http
+    // requestOptions = checkOptions(requestOptions);
+    // let result = trafficHandler.postToLocalHttpHost(url, requestOptions, JSON.stringify(registerData));
+
+    /* working alt */
     // postClockData(url, "", registerData);
     let result = await trafficHandler.postToLocalHttpHostAlt(url, JSON.stringify(registerData), 'POST');
     // let result = await trafficHandler.postToLocalHttpHostAxios(url, registerData, 'POST');
@@ -128,7 +141,11 @@ function getDestination(filePath, propName) {
     console.log(`Getting destination address`);
 
     const addressObj = new FileHandler().getObjectFromJSON(filePath);
-    return addressObj[`${propName}`];
+    if(addressObj !== null) {
+        return addressObj[`${propName}`];
+    } else {
+        return null;
+    }
 
 }
 
@@ -184,6 +201,7 @@ function stopApp(code) {
 
 
 function checkOptions(options) {
+console.debug("# ~ checkOptions ~ options", options);
 
     //TODO check address options
     return options;
@@ -196,10 +214,15 @@ function checkOptions(options) {
 async function postClockData(dest, dataString, dataObjTemplate) {
 
     let jsonData = dataHandler.formatJSONtimeString(dataString, dataObjTemplate);
+
+    /* broken alternative (EADDRINUSE) TODO remove*/
     // let requestOptions = trafficHandler.getHttpOptions(dest, "POST"); // for node.js http
-    // checkOptions(requestOptions);
+    // requestOptions = checkOptions(requestOptions);
+    // trafficHandler.postToLocalHttpHost(dest, requestOptions, jsonData);
+    // jsonData = null;
+
+    /* working alternatives fetch or axios TODO choose */
     if(jsonData !== null) {
-        // await trafficHandler.startPostingData(requestOptions, jsonData);
         await trafficHandler.startPostingData(dest, jsonData);
     }
 
@@ -238,6 +261,7 @@ async function mainLoop(destination) {
         if(!trafficHandler._postSuccessful) {
             failCount++;
             console.debug("Fails: ", failCount);
+            //TODO check file
         } else {
             // successful post resets counter
             failCount = 0;
@@ -249,4 +273,53 @@ async function mainLoop(destination) {
 }
 
 /* App start */
+printInfo();
 initialize(corePropName);
+
+
+/* Post some info to OLED
+    In: info text
+    TODO */
+async function postInfo(info) {
+    let done = false;
+    await setTimeoutPromise(5000);
+
+    if (registered) {
+        //TODO post to device, set done
+
+    }
+
+    if (!done) {
+        // try again
+        const infoTimer = setInterval(() => {
+            //TODO post to device, set done
+
+            if (done) {
+                clearInterval(infoTimer);
+            }
+        }, 5000);
+    }
+
+    setTimeout((infoTimer) => {
+        // stop trying
+        if (!done) {
+            clearInterval(infoTimer);
+        }
+    }, 30000);
+
+}
+
+/* Read package.json and print version info to console */
+function printInfo() {
+    let packageFileJSON = new FileHandler().getObjectFromJSON('./package.json');
+    let appVersion = "ver. ";
+    if (packageFileJSON === null) {
+        appVersion = appVersion + "[no version info]";
+    } else {
+        appVersion = appVersion + packageFileJSON["version"] + " by " + packageFileJSON["author"];
+    }
+    const infoText = `\nClock app for SteelSeries OLED (${appVersion})\n`;
+    console.log(infoText);
+
+    postInfo(infoText);
+}

@@ -43,13 +43,15 @@ class TrafficHandler {
 
         let optionObj = {};
 
-        let delimiterPos = url.indexOf(":");
+        let delimiterPos = url.lastIndexOf(":");
+        let pathStart = url.lastIndexOf("/");
+        let addressStart = url.indexOf("/") + 2;
 
-        optionObj.localAddress = url.substring(0, delimiterPos);
+        optionObj.localAddress = url.substring(addressStart, delimiterPos);
+        optionObj.protocol = url.substring(0, addressStart - 2); //default: "http:"
+        optionObj.localPort = Number.parseInt(url.substring(delimiterPos + 1, pathStart));
 
-        optionObj.localPort = Number.parseInt(url.substring(delimiterPos + 1));
-
-        optionObj.path = url.substring(url.indexOf('/'));
+        optionObj.path = url.substring(pathStart);
 
         optionObj.method = method;
 
@@ -106,10 +108,11 @@ class TrafficHandler {
 
 
     /* In: url (string), data for request, http method (string)
-        Out: (boolean) returned via interpretResponse */
+        Out: (boolean) returned via interpretResponse or interpretError */
     async postToLocalHttpHostAlt(url, data, method) {
 
         let response;
+
         const options = {
             method: method,
             headers: {
@@ -120,6 +123,7 @@ class TrafficHandler {
 
         try {
             response = await fetch(url, options);
+            // let responseData = await response.json(); //same as posted data with new keys "level" (empty string) and "Data" (same as post "data")?
         }
         catch (e) {
             console.error(e.message + ': ' + e.cause);
@@ -133,11 +137,11 @@ class TrafficHandler {
     // TODO fix, return value
     /* In: node.js http options (object), data for request
         Out: success (boolean) */
-    async postToLocalHttpHost(options, data) {
+    async postToLocalHttpHost(url, options, data) {
 
         let done;
 
-        const postRequest = http.request(options, (res) => {
+        const postRequest = http.request(url, options, (res) => {
             res.on('data', (chunk) => {
                 console.log(`BODY: ${chunk}`);
             });
@@ -153,7 +157,6 @@ class TrafficHandler {
             done = false;
         });
 
-
         postRequest.write(data);
         postRequest.end();
 
@@ -163,13 +166,17 @@ class TrafficHandler {
     }
 
 
+    // async startPostingDataNodeHttp(httpOptions, data) {
+    //     const res = await this.postToLocalHttpHost(httpOptions, data);
+    // }
+
     /* Post the data to destination 
         In:  (string) dest localhost address 
              (string) data 
         Out: (boolean) true if successful, false otherwise */
     async startPostingData(dest, data) {
 
-        let success = false;
+        // let success = false;
 
         this.destination = dest.localAddress ?? dest;
 
@@ -180,10 +187,7 @@ class TrafficHandler {
 
         if (dest.localAddress !== null) {
 
-            // console.log(`Waiting to post: ${data}`);
-
             // start posting
-            // const res = await this.postToLocalHttpHost(dest, data);
             // working alternatives:
             const res = await this.postToLocalHttpHostAlt(dest, data, 'POST');
             // const res = await this.postToLocalHttpHostAxios(dest, data, 'POST');
@@ -203,6 +207,7 @@ class TrafficHandler {
             return false;
         }
 
+        return true;
         // return success;
     }
 
