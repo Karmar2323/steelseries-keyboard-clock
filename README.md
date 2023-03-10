@@ -10,10 +10,12 @@ The minimum functionality target, the local time on the OLED screen, was achieve
 ## Working functionality
 On the OLED screen is displayed [the icon for clock](https://github.com/SteelSeries/gamesense-sdk/blob/master/doc/api/event-icons.md), current time (e.g. 9.37 or 22.02) and a progress bar that depicts the running seconds and resets when the next minute begins.
 
+<img src="./readme_images/clock_bar_144_40.jpg" alt="Photo of the screen of SteelSeries Apex 7" width = "144" height="40" title="View of the OLED screen of SteelSeries Apex 7">
+
 ## Requirements
 - Node.js version 18
 - SteelSeries Engine 3 or SteelSeries GG on Windows
-- SteelSeries screened device
+- A screened SteelSeries device
 
 ## Instructions
 - First time installation with npm package manager: "npm install".
