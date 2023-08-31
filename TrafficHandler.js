@@ -71,7 +71,7 @@ class TrafficHandler {
             if(response.status === 200) {
                 return true;
             } else {
-                console.debug("response.status", response.status);
+                console.debug("Response.status: ", response.status);
                 return false;
             }
 
@@ -134,8 +134,8 @@ class TrafficHandler {
 
 
 
-    // TODO fix, return value
-    /* In: node.js http options (object), data for request
+    // TODO fix/remove, return value
+    /* In: url (string), node.js http options (object), data for request
         Out: success (boolean) */
     async postToLocalHttpHost(url, options, data) {
 

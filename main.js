@@ -35,7 +35,7 @@ In: (string) property name to find in JSON file
 Out: undefined
     */
 async function initialize(altPropName) {
-
+    console.log("Initializing app");
     // Get platform and destination info
     const infoFile = getFilePath(os.platform());
 
@@ -70,12 +70,17 @@ async function initialize(altPropName) {
 
 async function removeEvent(url) {
 
-    let result = await trafficHandler.postToLocalHttpHostAlt(protocol + url + removeEventPath, JSON.stringify(clockData.removeEventData), 'POST');
+    let result = await trafficHandler.postToLocalHttpHostAlt(
+        protocol + url + removeEventPath, 
+        JSON.stringify(clockData.removeEventData), 'POST');
+
     if(result) {
         console.log("Event removed");
     } else {
         console.log("Event removal failed");
     }
+
+    return result;
 }
 
 
@@ -83,9 +88,11 @@ async function removeEvent(url) {
 In: (string) property name to find in JSON file
 Out: undefined */
 async function tryInitializing(propName, currentDest) {
-    console.log("Trying again shortly...");
+    console.log("Trying to remove event in 5 s...");
     await setTimeoutPromise(5000);
-    removeEvent(currentDest);
+    let removed = await removeEvent(currentDest);
+
+    console.log("Starting over in 30 s...");
     await setTimeoutPromise(30000);
     initialize(propName); 
 
@@ -108,6 +115,7 @@ async function registerOrBindGameEvent(url, action) {
 
     }
 
+    console.log(`Trying to ${action} event with SSE`);
     /* TODO remove test alternative */
     // let requestOptions = trafficHandler.getHttpOptions(url, "POST"); // for node.js http
     // requestOptions = checkOptions(requestOptions);
@@ -142,6 +150,7 @@ function getDestination(filePath, propName) {
 
     const addressObj = new FileHandler().getObjectFromJSON(filePath);
     if(addressObj !== null) {
+        console.log("OK");
         return addressObj[`${propName}`];
     } else {
         return null;
@@ -285,8 +294,7 @@ async function postInfo(info) {
     await setTimeoutPromise(5000);
 
     if (registered) {
-        //TODO post to device, set done
-
+        //TODO post to device, set done, hold other posts
     }
 
     if (!done) {

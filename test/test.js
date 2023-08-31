@@ -1,9 +1,55 @@
 import assert from 'assert';
+import {mock, test} from 'node:test'; //TODO
 import DataHandler from '../DataHandler.js';
 import ClockData from '../ClockData.js';
+import FileHandler from '../FileHandler.js';
 
 const dataHandler = new DataHandler();
 const clockData = new ClockData();
+const fileHandler = new FileHandler();
+
+describe('FileHandler', () => {
+
+    describe('readFileContent', () => {
+        it(`should return string`, () => {
+            const result = fileHandler.readFileContent('README.md');
+            assert.equal(typeof result, 'string');
+        });
+
+    });
+
+    describe('readFileContent', () => {
+        it(`should return string`, () => {
+            const result = fileHandler.readFileContent('package.json');
+            assert.equal(typeof result, 'string');
+        });
+
+    });
+
+    describe('readFileContent', () => {
+        it(`should return null`, () => {
+            const result = fileHandler.readFileContent('not-a-file');
+            assert.equal(result, null);
+
+        });
+
+    });
+
+    describe('getObjectFromJSON', () => {
+        it(`should return JSON convertible object`, () => {
+            const result = fileHandler.getObjectFromJSON('package.json');
+            assert.equal (typeof JSON.stringify(result), 'string');
+        });
+    });
+
+    describe('getObjectFromJSON', () => {
+        it(`should return null`, () => {
+            const result = fileHandler.getObjectFromJSON('README.md');
+            assert.equal (result, null);
+        });
+    });
+});
+
 describe('DataHandler', () => {
 
     describe('removeCharsFromString', () => {
@@ -20,6 +66,17 @@ describe('DataHandler', () => {
             assert.equal(result.includes(input), true);
         });
 
+        it(`should throw TypeError if 1st parameter is not a string`, () => {
+            let input = 2;
+            let result;
+            try {
+                result  = dataHandler.removeCharsFromString(input, unwanted);
+            }
+            catch (e) {
+                console.log(e.message)
+                assert(e instanceof TypeError);
+            }
+        });
     });
     describe('normalizeNumberFromString', () => {
         const inputs = ['-50', '-1', '0', '1', '59', '60'];

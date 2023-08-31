@@ -8,6 +8,10 @@ class DataHandler {
         Out: string */
     removeCharsFromString(oldString, charToRemove) {
 
+        if(typeof oldString !== 'string') {
+            throw new TypeError("Input is not a string!");
+        }
+
         const replacer = function () {
             return "";
         }
@@ -42,9 +46,13 @@ class DataHandler {
 
     /* Convert string to positive integer
     and change its value from scale 0...oldMax to 0...newMax
-    In: number as (string), current maximum (number), new maximum (number)*/
+    In: number as (string), current maximum (number), new maximum (number)
+    Out: integer (number) */
     normalizeNumberFromString(numberString, oldMax, newMax) {
 
+        if(oldMax === 0) {
+            return 0;
+        }
         let newNumber = Math.round(Number.parseInt(numberString) / oldMax * newMax);
         if (Number.isNaN(newNumber)) {
             return 0;
@@ -73,14 +81,14 @@ class DataHandler {
             /* Sending an event, not registering it with other object */
             // fill progress bar with integer 0...100
             let delimiter = data[data.search(/[^0-9]/)];
-            numberDataValue = this.normalizeNumberFromString(data.slice(data.lastIndexOf(delimiter) + 1), 60, 100);
+            numberDataValue = this.normalizeNumberFromString(
+                data.slice(data.lastIndexOf(delimiter) + 1), 60, 100);
             message.data["value"] = numberDataValue;
 
             // time data: hour & min as text
             message.data["frame"]["textvalue"] = data.slice(0, data.lastIndexOf(delimiter));
         }
 
-        // return JSON.stringify(message);
         return this.stringToJSON(message);
         // return message; // works with axios
 

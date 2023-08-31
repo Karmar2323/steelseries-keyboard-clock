@@ -4,13 +4,13 @@ class FileHandler {
     constructor() { }
 
     /* In: (string) file path  
-        Out: (string) address with port number or
-             null, if address not found:  */
+        Out: (string) file content or
+             null, if error is thrown  */
     readFileContent(file) {
 
         let fileContent;
         try {
-            fileContent = fs.readFileSync(file);
+            fileContent = fs.readFileSync(file, {'encoding': 'utf8'});
         } catch (err) {
             console.log(err.message);
 
@@ -48,7 +48,5 @@ class FileHandler {
         }
         return coreObj;
     }
-
-
 }
 export default FileHandler;

@@ -20,5 +20,8 @@ On the OLED screen is displayed [the icon for clock](https://github.com/SteelSer
 ## Instructions
 - First time installation with npm package manager: "npm install".
 - Starting the app on the command line: "node main.js".
+- Terminating the app: Use the force (Ctrl + C).
+- The test script runs with command "npm test".
+- Troubleshooting: Try restarting SteelSeries Engine or GG
 
-More readme content coming later.
+More readme content may be coming later.
