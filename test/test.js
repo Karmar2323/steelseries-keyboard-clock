@@ -3,10 +3,39 @@ import {mock, test} from 'node:test'; //TODO
 import DataHandler from '../DataHandler.js';
 import ClockData from '../ClockData.js';
 import FileHandler from '../FileHandler.js';
+import TrafficHandler from '../TrafficHandler.js';
 
 const dataHandler = new DataHandler();
 const clockData = new ClockData();
 const fileHandler = new FileHandler();
+const trafficHandler = new TrafficHandler();
+
+describe('TrafficHandler', () => {
+    describe ('interPretResponse', () => {
+        it('should return true', () => {
+            const response = new Response();
+            assert(trafficHandler.interpretResponse(response));
+        });
+
+        it('should return false', () => {
+            const response = Response.error();
+            assert(!trafficHandler.interpretResponse(response));
+        });
+
+        it(`should throw TypeError if parameter is not a response instance`, () => {
+            let input = 2;
+            let result;
+            try {
+                result  = trafficHandler.interpretResponse(input);
+            }
+            catch (e) {
+                console.log(e.message)
+                assert(e instanceof TypeError);
+            }
+        });
+    });
+
+});
 
 describe('FileHandler', () => {
 

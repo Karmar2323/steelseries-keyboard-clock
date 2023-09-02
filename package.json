@@ -1,6 +1,6 @@
 {
   "name": "clock-for-steelseries-oled",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Real-time clock for SteelSeries device OLED screen",
   "main": "main.js",
   "scripts": {
@@ -19,8 +19,5 @@
   "type": "module",
   "devDependencies": {
     "mocha": "^10.1.0"
-  },
-  "dependencies": {
-    "axios": "^1.1.3"
   }
 }

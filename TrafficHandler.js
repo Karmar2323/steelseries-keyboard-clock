@@ -1,6 +1,3 @@
-import http from 'node:http';
-import { setTimeout as setTimeoutPromise } from 'node:timers/promises';
-import axios from 'axios';
 
 class TrafficHandler {
 
@@ -29,42 +26,16 @@ class TrafficHandler {
     axiosInstance = {};
 
     constructor() {
-        this.axiosInstance = axios.create({
-            baseURL: this._destination
-        });
-        this.axiosInstance.defaults.headers.post['Content-Type'] = this.contentType;
      }
-
-
-    /* Parse URL to node.js http request options 
-        In: URL (string), http method (string)
-        Out: http options (object) */
-    getHttpOptions(url, method) {
-
-        let optionObj = {};
-
-        let delimiterPos = url.lastIndexOf(":");
-        let pathStart = url.lastIndexOf("/");
-        let addressStart = url.indexOf("/") + 2;
-
-        optionObj.localAddress = url.substring(addressStart, delimiterPos);
-        optionObj.protocol = url.substring(0, addressStart - 2); //default: "http:"
-        optionObj.localPort = Number.parseInt(url.substring(delimiterPos + 1, pathStart));
-
-        optionObj.path = url.substring(pathStart);
-
-        optionObj.method = method;
-
-        optionObj.headers = {
-            'Content-Type': this.contentType
-          }
-        return optionObj;
-    }
 
 
     /* In: http response
         Out: (boolean) true for status 200, false otherwise */
     interpretResponse(response) {
+
+        if(!(response instanceof Response)) {
+            throw new TypeError("Input type error!");
+        }
 
         if (response.status !== undefined) {
 
@@ -85,25 +56,6 @@ class TrafficHandler {
     interpretError(error) {
 
         return false;
-    }
-
-
-    /* In: url (string), data for request, http method (string)
-        Out: (boolean) returned via interpretResponse or interpretError */
-    async postToLocalHttpHostAxios(url, data, method) {
-
-        let options = {url: url, data: data, method: method};
-        let response;
-
-        try {
-            // response = await axios(options);
-            response = await this.axiosInstance(options);
-        } catch (e) {
-            console.error (e.code + ': ' + e.message + ': ' + options.url + ', data: ' + options.data);
-            return this.interpretError(e);
-        }
-
-        return this.interpretResponse(response);
     }
 
 
@@ -132,43 +84,6 @@ class TrafficHandler {
         return this.interpretResponse(response);
     }
 
-
-
-    // TODO fix/remove, return value
-    /* In: url (string), node.js http options (object), data for request
-        Out: success (boolean) */
-    async postToLocalHttpHost(url, options, data) {
-
-        let done;
-
-        const postRequest = http.request(url, options, (res) => {
-            res.on('data', (chunk) => {
-                console.log(`BODY: ${chunk}`);
-            });
-            res.setEncoding('utf8');
-            res.on('end', () => {
-                console.log('No more data in response.');
-                done = true;
-            });
-        });
-
-        postRequest.on('error', (e) => {
-            console.error(`${e.code} problem with request: ${e.message}`);
-            done = false;
-        });
-
-        postRequest.write(data);
-        postRequest.end();
-
-        await setTimeoutPromise(1000);
-        // return postRequest.writableEnded;
-        return done;
-    }
-
-
-    // async startPostingDataNodeHttp(httpOptions, data) {
-    //     const res = await this.postToLocalHttpHost(httpOptions, data);
-    // }
 
     /* Post the data to destination 
         In:  (string) dest localhost address 

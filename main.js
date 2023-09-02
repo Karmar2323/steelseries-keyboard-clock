@@ -67,7 +67,7 @@ async function initialize(altPropName) {
 
 };
 
-
+/* Remove event from gamesense */
 async function removeEvent(url) {
 
     let result = await trafficHandler.postToLocalHttpHostAlt(
@@ -116,15 +116,9 @@ async function registerOrBindGameEvent(url, action) {
     }
 
     console.log(`Trying to ${action} event with SSE`);
-    /* TODO remove test alternative */
-    // let requestOptions = trafficHandler.getHttpOptions(url, "POST"); // for node.js http
-    // requestOptions = checkOptions(requestOptions);
-    // let result = trafficHandler.postToLocalHttpHost(url, requestOptions, JSON.stringify(registerData));
 
-    /* working alt */
-    // postClockData(url, "", registerData);
+    /* working alternative using fetch */
     let result = await trafficHandler.postToLocalHttpHostAlt(url, JSON.stringify(registerData), 'POST');
-    // let result = await trafficHandler.postToLocalHttpHostAxios(url, registerData, 'POST');
 
     if( !result) {
         console.log(`Event ${action}ing failed`);
@@ -209,14 +203,6 @@ function stopApp(code) {
 }
 
 
-function checkOptions(options) {
-console.debug("# ~ checkOptions ~ options", options);
-
-    //TODO check address options
-    return options;
-}
-
-
 /* Make JSON from string, start posting JSON to url
     In: url (string), data (string), object (format for JSON)
     Out: undefined */
@@ -224,15 +210,12 @@ async function postClockData(dest, dataString, dataObjTemplate) {
 
     let jsonData = dataHandler.formatJSONtimeString(dataString, dataObjTemplate);
 
-    /* broken alternative (EADDRINUSE) TODO remove*/
-    // let requestOptions = trafficHandler.getHttpOptions(dest, "POST"); // for node.js http
-    // requestOptions = checkOptions(requestOptions);
-    // trafficHandler.postToLocalHttpHost(dest, requestOptions, jsonData);
-    // jsonData = null;
-
-    /* working alternatives fetch or axios TODO choose */
     if(jsonData !== null) {
         await trafficHandler.startPostingData(dest, jsonData);
+    }
+    else {
+        console.log("Can not find JSON data!");
+        // TODO something
     }
 
 }
