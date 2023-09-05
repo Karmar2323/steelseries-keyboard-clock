@@ -1,4 +1,7 @@
-/* Project purpose: Display clock digits on SteelSeries keyboard OLED and/or backlit keys */
+/* main.js: initialization and main program control
+* Project: "clock-for-steelseries-oled"
+* purpose: Display clock digits on SteelSeries keyboard OLED and/or backlit keys
+*/
 
 import { setTimeout as setTimeoutPromise } from 'node:timers/promises';
 import os from 'node:os';
@@ -46,7 +49,7 @@ async function initialize(altPropName) {
 
     /* Get the destination address from file */
     let dest = getDestination(infoFile, altPropName);
-
+    console.log("New destination: ", dest);
     // try to bind handler to destination
     registered = await registerOrBindGameEvent(protocol + dest, 'bind');
 
@@ -144,7 +147,6 @@ function getDestination(filePath, propName) {
 
     const addressObj = new FileHandler().getObjectFromJSON(filePath);
     if(addressObj !== null) {
-        console.log("OK");
         return addressObj[`${propName}`];
     } else {
         return null;
@@ -225,9 +227,7 @@ async function postClockData(dest, dataString, dataObjTemplate) {
     */
 async function mainLoop(destination) {
 
-    let postingStatus = false; // indicate failed or successful post
-    let failCount = 0; // count failures
-
+    let failCount = 0; // count failed posts
 
     while (true) {
 
@@ -238,22 +238,13 @@ async function mainLoop(destination) {
 
         let clockTime = getTimeString();
 
-        // postingStatus = await postClockData(destination, clockTime, new ClockData().messageData);
         postClockData(protocol + destination + eventPath, clockTime, clockData.messageData);
-
-        // if (!postingStatus) {
-        //     failCount++;
-        // } else {
-        //     // successful post resets counter
-        //     failCount = 0;
-        // }
 
         await setTimeoutPromise(1000);
 
         if(!trafficHandler._postSuccessful) {
             failCount++;
             console.debug("Fails: ", failCount);
-            //TODO check file
         } else {
             // successful post resets counter
             failCount = 0;

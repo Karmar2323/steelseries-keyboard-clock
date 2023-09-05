@@ -1,4 +1,6 @@
-
+/* DataHandler.js: handles the formatting of data
+* Project: "clock-for-steelseries-oled"
+*/
 class DataHandler {
 
     constructor() { }
@@ -78,7 +80,6 @@ class DataHandler {
         }
 
         if (message.data !== undefined) {
-            /* Sending an event, not registering it with other object */
             // fill progress bar with integer 0...100
             let delimiter = data[data.search(/[^0-9]/)];
             numberDataValue = this.normalizeNumberFromString(
@@ -90,7 +91,6 @@ class DataHandler {
         }
 
         return this.stringToJSON(message);
-        // return message; // works with axios
 
     }
 

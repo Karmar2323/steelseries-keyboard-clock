@@ -1,19 +1,9 @@
-
+/* TrafficHandler.js: handles the http related operations
+* Project: "clock-for-steelseries-oled"
+*/
 class TrafficHandler {
 
     contentType = 'application/json';
-
-    _destination = "";
-    get destination() {
-        return this._destination;
-    }
-    set destination(value) {
-        if (this._destination === value) {
-            return;
-        }
-        this._destination = value;
-        console.log("New destination: ", this._destination);
-    }
 
     _postSuccessful = true;
     get postSuccessful() {
@@ -22,8 +12,6 @@ class TrafficHandler {
     set postSuccessful(value) {
         this._postSuccessful = value;
     }
-
-    axiosInstance = {};
 
     constructor() {
      }
@@ -52,7 +40,7 @@ class TrafficHandler {
     }
 
 
-    // TODO
+    // TODO?
     interpretError(error) {
 
         return false;
@@ -75,7 +63,6 @@ class TrafficHandler {
 
         try {
             response = await fetch(url, options);
-            // let responseData = await response.json(); //same as posted data with new keys "level" (empty string) and "Data" (same as post "data")?
         }
         catch (e) {
             console.error(e.message + ': ' + e.cause);
@@ -91,10 +78,6 @@ class TrafficHandler {
         Out: (boolean) true if successful, false otherwise */
     async startPostingData(dest, data) {
 
-        // let success = false;
-
-        this.destination = dest.localAddress ?? dest;
-
         if (data === null) {
             console.log("Nothing to post");
             return false;
@@ -102,13 +85,7 @@ class TrafficHandler {
 
         if (dest.localAddress !== null) {
 
-            // start posting
-            // working alternatives:
             const res = await this.postToLocalHttpHostAlt(dest, data, 'POST');
-            // const res = await this.postToLocalHttpHostAxios(dest, data, 'POST');
-
-            // TODO handle response, signal fail/success
-            // success = res;
 
             if (res === false) {
                 this._postSuccessful = res;
@@ -116,14 +93,13 @@ class TrafficHandler {
                 this._postSuccessful = true;
             }
 
-
         } else {
             console.log(`Cannot post ${data}`);
             return false;
         }
 
         return true;
-        // return success;
+
     }
 
 }
