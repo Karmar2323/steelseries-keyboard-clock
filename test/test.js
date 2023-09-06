@@ -22,16 +22,11 @@ describe('TrafficHandler', () => {
             assert(!trafficHandler.interpretResponse(response));
         });
 
-        it(`should throw TypeError if parameter is not a response instance`, () => {
+        it(`should return false if parameter is not a response instance`, () => {
             let input = 2;
             let result;
-            try {
-                result  = trafficHandler.interpretResponse(input);
-            }
-            catch (e) {
-                console.log(e.message)
-                assert(e instanceof TypeError);
-            }
+            result  = trafficHandler.interpretResponse(input);
+            assert(!result);
         });
     });
 
@@ -95,16 +90,12 @@ describe('DataHandler', () => {
             assert.equal(result.includes(input), true);
         });
 
-        it(`should throw TypeError if 1st parameter is not a string`, () => {
-            let input = 2;
+        it(`should return empty string if 1st parameter is not a string`, () => {
+            let input = {"note": 2, "key": "g value"};
             let result;
-            try {
-                result  = dataHandler.removeCharsFromString(input, unwanted);
-            }
-            catch (e) {
-                console.log(e.message)
-                assert(e instanceof TypeError);
-            }
+
+            result  = dataHandler.removeCharsFromString(input, unwanted);
+            assert(typeof result === "string" && result.length < 1);
         });
     });
     describe('normalizeNumberFromString', () => {

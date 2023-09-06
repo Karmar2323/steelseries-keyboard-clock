@@ -22,7 +22,7 @@ class TrafficHandler {
     interpretResponse(response) {
 
         if(!(response instanceof Response)) {
-            throw new TypeError("Input type error!");
+            return false;
         }
 
         if (response.status !== undefined) {

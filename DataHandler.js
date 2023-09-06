@@ -11,7 +11,8 @@ class DataHandler {
     removeCharsFromString(oldString, charToRemove) {
 
         if(typeof oldString !== 'string') {
-            throw new TypeError("Input is not a string!");
+            console.log("Input is not a string!");
+            return "";
         }
 
         const replacer = function () {
