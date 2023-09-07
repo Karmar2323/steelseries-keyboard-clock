@@ -8,7 +8,12 @@ The project was started on October 9th 2022 by taking a look at [SteelSeries Gam
 The minimum functionality target, the local time on the OLED screen, was achieved on October 30th 2022. Further development may include e.g. stability improvement, sleep mode/screen saver, start/stop schedule, using of illumination/RGB lighting...
 
 ## Working functionality
-On the OLED screen is displayed [the icon for clock](https://github.com/SteelSeries/gamesense-sdk/blob/master/doc/api/event-icons.md), current time (e.g. 9.37 or 22.02) and a progress bar that depicts the running seconds and resets when the next minute begins.
+On the OLED screen is displayed:
+- [the icon for clock](https://github.com/SteelSeries/gamesense-sdk/blob/master/doc/api/event-icons.md), 
+- the current time (e.g. 9.37 or 22.02),
+- a progress bar that depicts the running seconds and resets when the next minute begins.
+Command line interface:
+- set the clock update interval in seconds by typing a number from 1 to 14.
 
 <img src="./readme_images/clock_bar_144_40.jpg" alt="Photo of the screen of SteelSeries Apex 7" width = "144" height="40" title="View of the OLED screen of SteelSeries Apex 7">
 

@@ -10,13 +10,15 @@ import FileHandler from './FileHandler.js';
 import DataHandler from './DataHandler.js';
 import ClockData from './ClockData.js';
 import TrafficHandler from './TrafficHandler.js';
+import ClockEventEmitter from './ClockEventEmitter.js';
 
 class ClockHandler {
     constructor(){
         this.dataHandler = new DataHandler();
         this.trafficHandler = new TrafficHandler();
         this.clockData = new ClockData();
-        this.initialize(this.corePropName);        
+        this.eventEmitter = new ClockEventEmitter(this);
+        this.initialize(this.corePropName);
     }
     portFileOnOSX = "/Library/Application Support/SteelSeries Engine 3/coreProps.json";
     portFileOnWindows = "%PROGRAMDATA%/SteelSeries/SteelSeries Engine 3/coreProps.json";
@@ -51,7 +53,7 @@ class ClockHandler {
             return;
         }
 
-        /* Get the destination address from file */
+        // Get the destination address from file
         let dest = this.getDestination(infoFile, altPropName);
         console.log("New destination: ", dest);
         // try to bind handler to destination
@@ -262,11 +264,11 @@ class ClockHandler {
         let packageFileJSON = new FileHandler().getObjectFromJSON('./package.json');
         let appVersion = "ver. ";
         if (packageFileJSON === null) {
-            appVersion = appVersion + "[no version info]";
+            appVersion = appVersion + "no version info";
         } else {
             appVersion = appVersion + packageFileJSON["version"] + " (C) " + packageFileJSON["author"];
         }
-        const infoText = `\nClock app for SteelSeries OLED ${appVersion}\n`;
+        const infoText = `\nClock app for SteelSeries OLED [${appVersion}]\n`;
         console.log(infoText);
     }
 }
