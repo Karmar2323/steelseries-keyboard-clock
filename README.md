@@ -7,7 +7,8 @@ The project was started on October 9th 2022 by taking a look at [SteelSeries Gam
 
 The minimum functionality target, the local time on the OLED screen, was achieved on October 30th 2022. Further development may include e.g. stability improvement, sleep mode/screen saver, start/stop schedule, using of illumination/RGB lighting...
 
-The next new functionality was devised in early September 2023 as the evenings begun darkening again. Inputting a number on the command line changes the clock event update interval. This might be useful if, for instance, another app also has events to show on the screen. The restriction of intervals to under 15 seconds is due to GameSense's deactivation [timeout](https://github.com/SteelSeries/gamesense-sdk/blob/master/doc/api/sending-game-events.md#heartbeatkeepalive-events).
+The next new functionality was devised in early September 2023 as the evenings began to darken again.
+Inputting a number on the command line changes the clock event update interval. This might be useful if, for instance, another app also has events to show on the screen. The restriction of intervals to under 15 seconds is due to GameSense's deactivation [timeout](https://github.com/SteelSeries/gamesense-sdk/blob/master/doc/api/sending-game-events.md#heartbeatkeepalive-events).
 
 ## Working functionality
 On the OLED screen is displayed

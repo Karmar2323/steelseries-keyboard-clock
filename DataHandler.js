@@ -69,7 +69,8 @@ class DataHandler {
             hh: 0...9 | 10...23,
             - : any character but 0...9,
             mm: 00...59,
-            ss: 00...59
+            ss: 00...59,
+        convert ss from 0...59 to the progress bar scale of 0...100
     In: string, ClockData messageData property
     Out: JSON formatted string */
     formatJSONtimeString(data, message) {

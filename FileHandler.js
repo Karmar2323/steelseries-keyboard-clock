@@ -1,3 +1,6 @@
+/* FileHandler.js: read JSON files
+* Project: "clock-for-steelseries-oled"
+*/
 import fs from 'node:fs';
 
 class FileHandler {

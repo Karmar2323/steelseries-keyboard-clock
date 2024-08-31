@@ -1,3 +1,7 @@
+/* ClockData.js: the data of different events in JSON format that
+*  can be sent to the engine
+* Project: "clock-for-steelseries-oled"
+*/
 class ClockData {
     gameName = "CLOCK";
     eventName = "TIME";
